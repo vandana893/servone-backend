@@ -179,9 +179,30 @@ const updateTransactionStatus = async (id, status, referenceId = null, updatedBy
   }
 };
 
+const processPayout = async (transactionId, referenceId, adminId) => {
+  const transaction = await Transaction.findById(transactionId);
+  if (!transaction) throwError('Transaction not found', 404);
+  if (transaction.type !== 'PAYOUT') throwError('Transaction is not a PAYOUT', 400);
+  if (transaction.status === 'SUCCESS') throwError('Payout is already processed', 400);
+
+  const partner = await Partner.findById(transaction.partnerId);
+  if (!partner) throwError('Partner not found', 404);
+
+  // If deducting on success (some systems deduct on request, we deduct on success here)
+  if (partner.walletBalance < transaction.amount) {
+    throwError('Insufficient wallet balance to process this payout', 400);
+  }
+
+  partner.walletBalance -= transaction.amount;
+  await partner.save();
+
+  return await updateTransactionStatus(transactionId, 'SUCCESS', referenceId, adminId);
+};
+
 module.exports = {
   createTransaction,
   getTransactions,
   getTransactionById,
-  updateTransactionStatus
+  updateTransactionStatus,
+  processPayout
 };

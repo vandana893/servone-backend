@@ -121,7 +121,15 @@ const updateAdminRole = async (id, data, currentUserRole) => {
 };
 
 const getDashboardStats = async () => {
-  const [totalUsers, totalBookings, activePartners, pendingTickets, revenueAggr] = await Promise.all([
+  const [
+    totalUsers, 
+    totalBookings, 
+    activePartners, 
+    pendingTickets, 
+    revenueAggr,
+    bookingFunnel,
+    pendingAssignments
+  ] = await Promise.all([
     User.countDocuments(),
     Booking.countDocuments(),
     Partner.countDocuments({ status: 'APPROVED' }),
@@ -129,16 +137,65 @@ const getDashboardStats = async () => {
     Transaction.aggregate([
       { $match: { status: 'SUCCESS', type: { $in: ['PAYMENT', 'COMMISSION'] } } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
-    ])
+    ]),
+    Booking.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]),
+    Booking.countDocuments({ status: 'ACCEPTED' }) // Need assignment
   ]);
+
+  const formattedFunnel = bookingFunnel.reduce((acc, curr) => {
+    acc[curr._id] = curr.count;
+    return acc;
+  }, {});
 
   return {
     totalUsers,
     totalBookings,
     activePartners,
     revenue: revenueAggr.length > 0 ? revenueAggr[0].total : 0,
-    pendingTickets
+    pendingTickets,
+    bookingFunnel: formattedFunnel,
+    pendingAssignments
   };
+};
+
+const getBookingReports = async (query) => {
+  // basic aggregation
+  const pipeline = [
+    { $group: { _id: '$status', count: { $sum: 1 } } }
+  ];
+  const stats = await Booking.aggregate(pipeline);
+  return stats;
+};
+
+const getUserReports = async (query) => {
+  const pipeline = [
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        signups: { $sum: 1 }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ];
+  const stats = await User.aggregate(pipeline);
+  return stats;
+};
+
+const getRevenueReports = async (query) => {
+  const pipeline = [
+    { $match: { status: 'SUCCESS', type: { $in: ['PAYMENT', 'COMMISSION'] } } },
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+        revenue: { $sum: '$amount' }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ];
+  const stats = await Transaction.aggregate(pipeline);
+  return stats;
 };
 
 module.exports = {
@@ -149,5 +206,8 @@ module.exports = {
   getAdminById,
   updateAdminStatus,
   updateAdminRole,
-  getDashboardStats
+  getDashboardStats,
+  getBookingReports,
+  getUserReports,
+  getRevenueReports
 };

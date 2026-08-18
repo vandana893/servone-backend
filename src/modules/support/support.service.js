@@ -129,10 +129,24 @@ const updateStatus = async (ticketId, status, resolutionNote) => {
   return ticket;
 };
 
+const assignTicket = async (ticketId, adminId) => {
+  const ticket = await SupportTicket.findById(ticketId);
+  if (!ticket) throwError('Ticket not found', 404);
+
+  ticket.assignedAdminId = adminId;
+  if (ticket.status === 'Open') {
+    ticket.status = 'In Progress';
+  }
+
+  await ticket.save();
+  return ticket;
+};
+
 module.exports = {
   createTicket,
   getTickets,
   getTicketById,
   addMessage,
-  updateStatus
+  updateStatus,
+  assignTicket
 };

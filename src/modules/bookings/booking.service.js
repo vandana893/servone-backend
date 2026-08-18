@@ -368,6 +368,58 @@ const assignWorker = async (bookingId, workerId, auth, isReassign = false) => {
   return booking;
 };
 
+const adminAssignBooking = async (bookingId, partnerId, workerId, auth) => {
+  if (auth.accountType !== 'ADMIN') {
+    throw new Error('Only admins can use manual assignment');
+  }
+
+  const booking = await Booking.findById(bookingId);
+  if (!booking) throw new Error('Booking not found');
+
+  const partner = await Partner.findById(partnerId);
+  if (!partner) throw new Error('Partner not found');
+
+  booking.partnerId = partnerId;
+  
+  if (workerId) {
+    const worker = partner.workers.id(workerId);
+    if (!worker) throw new Error('Worker not found for this partner');
+    booking.workerId = workerId;
+  } else {
+    booking.workerId = null;
+  }
+
+  booking.status = 'ASSIGNED';
+  booking.timeline.push({
+    status: 'ASSIGNED',
+    note: 'Assigned manually by Admin',
+    updatedBy: auth.accountId,
+    updatedByModel: 'Admin'
+  });
+
+  await booking.save();
+  return booking;
+};
+
+const adminUpdateTimeline = async (bookingId, note, auth) => {
+  if (auth.accountType !== 'ADMIN') {
+    throw new Error('Only admins can manually add timeline notes');
+  }
+
+  const booking = await Booking.findById(bookingId);
+  if (!booking) throw new Error('Booking not found');
+
+  booking.timeline.push({
+    status: booking.status,
+    note,
+    updatedBy: auth.accountId,
+    updatedByModel: 'Admin'
+  });
+
+  await booking.save();
+  return booking;
+};
+
 module.exports = {
   createBooking,
   getBookings,
@@ -380,5 +432,7 @@ module.exports = {
   acceptBooking,
   rejectBooking,
   getEligibleWorkers,
-  assignWorker
+  assignWorker,
+  adminAssignBooking,
+  adminUpdateTimeline
 };

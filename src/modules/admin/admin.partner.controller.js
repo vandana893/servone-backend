@@ -59,9 +59,50 @@ const verifyPartnerKyc = async (req, res, next) => {
   }
 };
 
+const getWorkers = async (req, res, next) => {
+  try {
+    const partner = await partnerService.getPartnerById(req.params.id);
+    if (!partner) return sendError(res, 'Partner not found', 'NOT_FOUND', 404);
+    sendSuccess(res, partner.workers || [], 'Workers retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const addWorker = async (req, res, next) => {
+  try {
+    const workers = await partnerService.addWorker(req.params.id, req.body);
+    sendSuccess(res, workers, 'Worker added successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateWorker = async (req, res, next) => {
+  try {
+    const workers = await partnerService.updateWorker(req.params.id, req.params.workerId, req.body);
+    sendSuccess(res, workers, 'Worker updated successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteWorker = async (req, res, next) => {
+  try {
+    const workers = await partnerService.deleteWorker(req.params.id, req.params.workerId);
+    sendSuccess(res, workers, 'Worker deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPartners,
   getPartnerById,
   updatePartnerStatus,
-  verifyPartnerKyc
+  verifyPartnerKyc,
+  getWorkers,
+  addWorker,
+  updateWorker,
+  deleteWorker
 };

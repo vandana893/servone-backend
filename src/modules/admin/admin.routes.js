@@ -39,9 +39,24 @@ router.get('/partners/:id', requirePermission('Partners'), adminPartnerControlle
 router.patch('/partners/:id/status', requirePermission('Partners'), adminPartnerController.updatePartnerStatus);
 router.patch('/partners/:id/kyc-verify', requirePermission('PartnerVerification'), adminPartnerController.verifyPartnerKyc);
 
+// Worker Management
+router.get('/partners/:id/workers', requirePermission('Partners'), adminPartnerController.getWorkers);
+router.post('/partners/:id/workers', requirePermission('Partners'), adminPartnerController.addWorker);
+router.put('/partners/:id/workers/:workerId', requirePermission('Partners'), adminPartnerController.updateWorker);
+router.delete('/partners/:id/workers/:workerId', requirePermission('Partners'), adminPartnerController.deleteWorker);
+
 // === BOOKINGS ===
 router.get('/bookings', requirePermission('Bookings'), adminBookingController.getBookings);
 router.get('/bookings/:id', requirePermission('Bookings'), adminBookingController.getBookingById);
+router.put('/bookings/:id/assign', requirePermission('Bookings'), adminBookingController.assignBooking);
+router.put('/bookings/:id/cancel', requirePermission('Bookings'), adminBookingController.cancelBooking);
+router.put('/bookings/:id/reschedule', requirePermission('Bookings'), adminBookingController.rescheduleBooking);
+router.put('/bookings/:id/timeline', requirePermission('Bookings'), adminBookingController.updateTimeline);
+
+// === FINANCE / PAYOUTS ===
+const adminFinanceController = require('./admin.finance.controller');
+router.get('/finance/payouts/pending', requirePermission('Finance'), adminFinanceController.getPendingPayouts);
+router.post('/finance/payouts/:id/process', requirePermission('Finance'), adminFinanceController.processPayout);
 
 // === SUBSCRIPTIONS ===
 const adminSubscriptionController = require('./admin.subscription.controller');
@@ -52,5 +67,16 @@ router.get('/subscriptions/:id', requirePermission('Subscriptions'), adminSubscr
 router.get('/:id', authorize('SuperAdmin'), adminController.getAdminById);
 router.patch('/:id/status', authorize('SuperAdmin'), validate(updateAdminStatusSchema), adminController.updateAdminStatus);
 router.patch('/:id/role', authorize('SuperAdmin'), validate(updateAdminRoleSchema), adminController.updateAdminRole);
+
+// === SUPPORT TICKETS ===
+const adminSupportController = require('./admin.support.controller');
+router.put('/support/tickets/:id/assign', requirePermission('Support'), adminSupportController.assignTicket);
+router.put('/support/tickets/:id/resolve', requirePermission('Support'), adminSupportController.resolveTicket);
+
+// === REPORTS ===
+const adminReportController = require('./admin.report.controller');
+router.get('/reports/bookings', requirePermission('Reports'), adminReportController.getBookingReports);
+router.get('/reports/users', requirePermission('Reports'), adminReportController.getUserReports);
+router.get('/reports/revenue', requirePermission('Reports'), adminReportController.getRevenueReports);
 
 module.exports = router;
