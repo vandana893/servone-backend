@@ -30,16 +30,24 @@ router.get('/', authorize('SuperAdmin'), validate(getAdminsQuerySchema), adminCo
 
 // === USERS ===
 router.get('/users', requirePermission('Users'), adminUserController.getUsers);
+router.get('/users/stats', requirePermission('Users'), adminUserController.getUserStats);
+router.get('/users/login-attempts', requirePermission('Users'), adminUserController.getLoginAttempts);
+router.get('/users/activity-logs', requirePermission('Users'), adminUserController.getActivityLogs);
 router.get('/users/:id', requirePermission('Users'), adminUserController.getUserById);
 router.patch('/users/:id/status', requirePermission('Users'), adminUserController.updateUserStatus);
 
 // === PARTNERS ===
 router.get('/partners', requirePermission('Partners'), adminPartnerController.getPartners);
+router.get('/partners/stats', requirePermission('Partners'), adminPartnerController.getPartnerStats);
 router.get('/partners/:id', requirePermission('Partners'), adminPartnerController.getPartnerById);
 router.patch('/partners/:id/status', requirePermission('Partners'), adminPartnerController.updatePartnerStatus);
 router.patch('/partners/:id/kyc-verify', requirePermission('PartnerVerification'), adminPartnerController.verifyPartnerKyc);
 
 // Worker Management
+router.get('/workers', requirePermission('Partners'), adminPartnerController.getAllWorkers);
+router.get('/workers/complaints', requirePermission('Partners'), adminPartnerController.getWorkerComplaints);
+router.get('/workers/availability', requirePermission('Partners'), adminPartnerController.getWorkerAvailability);
+router.get('/workers/assignments', requirePermission('Partners'), adminPartnerController.getWorkerAssignments);
 router.get('/partners/:id/workers', requirePermission('Partners'), adminPartnerController.getWorkers);
 router.post('/partners/:id/workers', requirePermission('Partners'), adminPartnerController.addWorker);
 router.put('/partners/:id/workers/:workerId', requirePermission('Partners'), adminPartnerController.updateWorker);
@@ -55,6 +63,11 @@ router.put('/bookings/:id/timeline', requirePermission('Bookings'), adminBooking
 
 // === FINANCE / PAYOUTS ===
 const adminFinanceController = require('./admin.finance.controller');
+router.get('/finance/payouts', requirePermission('Finance'), adminFinanceController.getPayouts);
+router.get('/finance/payouts/failed', requirePermission('Finance'), adminFinanceController.getFailedPayouts);
+router.get('/finance/payouts/queue', requirePermission('Finance'), adminFinanceController.getPayoutQueue);
+router.get('/finance/payouts/ledger', requirePermission('Finance'), adminFinanceController.getPayoutLedger);
+router.get('/finance/payouts/processing', requirePermission('Finance'), adminFinanceController.getProcessingPayouts);
 router.get('/finance/payouts/pending', requirePermission('Finance'), adminFinanceController.getPendingPayouts);
 router.post('/finance/payouts/:id/process', requirePermission('Finance'), adminFinanceController.processPayout);
 

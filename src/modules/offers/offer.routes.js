@@ -30,4 +30,8 @@ router.put(
   offerController.updateOfferStatus
 );
 
+router.get('/admin/promocodes', offerController.getPromocodes);
+router.get('/admin/sales', offerController.getSales);
+router.get('/admin/banners', offerController.getBanners);
+
 module.exports = router;

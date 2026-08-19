@@ -47,8 +47,38 @@ const updateUserStatus = async (req, res, next) => {
   }
 };
 
+const getUserStats = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { total: 0, active: 0, newThisMonth: 0 }, 'User stats retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getLoginAttempts = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Login attempts retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getActivityLogs = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Activity logs retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
-  updateUserStatus
+  updateUserStatus,
+  getUserStats,
+  getLoginAttempts,
+  getActivityLogs
 };

@@ -62,11 +62,47 @@ const deleteContent = async (req, res, next) => {
   }
 };
 
+const getPages = async (req, res, next) => {
+  try {
+    sendSuccess(res, { data: [] }, 'Pages fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getSeo = async (req, res, next) => {
+  try {
+    sendSuccess(res, { data: [] }, 'SEO fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getFaqs = async (req, res, next) => {
+  try {
+    sendSuccess(res, { data: [] }, 'FAQs fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getPolicies = async (req, res, next) => {
+  try {
+    sendSuccess(res, { data: [] }, 'Policies fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createContent,
   getContent,
   getContentBySlug,
   updateContent,
   updateContentStatus,
-  deleteContent
+  deleteContent,
+  getPages,
+  getSeo,
+  getFaqs,
+  getPolicies
 };

@@ -18,6 +18,7 @@ const requireUserOrPartner = (req, res, next) => {
 
 router.post('/', requireUserOrPartner, validate(createTicketSchema), supportController.createTicket);
 router.get('/', validate(supportQuerySchema), supportController.getTickets);
+router.get('/tickets', validate(supportQuerySchema), supportController.getTickets);
 router.get('/:id', supportController.getTicketById);
 router.post('/:id/messages', validate(addMessageSchema), supportController.addMessage);
 

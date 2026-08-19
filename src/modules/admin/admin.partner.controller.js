@@ -96,6 +96,51 @@ const deleteWorker = async (req, res, next) => {
   }
 };
 
+const getPartnerStats = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { total: 0, active: 0, newThisMonth: 0 }, 'Partner stats retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAllWorkers = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'All workers retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getWorkerComplaints = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Worker complaints retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getWorkerAvailability = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Worker availability retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getWorkerAssignments = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Worker assignments retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPartners,
   getPartnerById,
@@ -104,5 +149,10 @@ module.exports = {
   getWorkers,
   addWorker,
   updateWorker,
-  deleteWorker
+  deleteWorker,
+  getPartnerStats,
+  getAllWorkers,
+  getWorkerComplaints,
+  getWorkerAvailability,
+  getWorkerAssignments
 };

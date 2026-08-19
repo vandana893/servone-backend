@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Import module routes here (to be created later)
 const authRoutes = require('./modules/auth/auth.routes');
+const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const userRoutes = require('./modules/users/user.routes');
 const partnerRoutes = require('./modules/partners/partner.routes');
 const catalogRoutes = require('./modules/catalog/catalog.routes');
@@ -22,10 +23,11 @@ const walletRoutes = require('./modules/wallets/wallet.routes');
 const settingRoutes = require('./modules/settings/setting.routes');
 const uploadRoutes = require('./modules/uploads/upload.routes');
 const auditRoutes = require('./modules/audit/audit.routes');
-
 const trackingRoutes = require('./modules/tracking/tracking.routes');
+const supplierRequestRoutes = require('./modules/supplier-requests/supplier-request.routes');
 
 router.use('/auth', authRoutes);
+router.use('/dashboard', dashboardRoutes);
 router.use('/users', userRoutes);
 router.use('/partners', partnerRoutes);
 router.use('/catalog', catalogRoutes);
@@ -46,5 +48,6 @@ router.use('/settings', settingRoutes);
 router.use('/uploads', uploadRoutes);
 router.use('/audit', auditRoutes);
 router.use('/tracking', trackingRoutes);
+router.use('/supplier-requests', supplierRequestRoutes);
 
 module.exports = router;

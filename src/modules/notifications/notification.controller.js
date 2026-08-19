@@ -54,8 +54,44 @@ const markAllAsRead = async (req, res, next) => {
   }
 };
 
+const getBroadcasts = async (req, res, next) => {
+  try {
+    sendSuccess(res, { data: [] }, 'Broadcasts fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createBroadcast = async (req, res, next) => {
+  try {
+    sendSuccess(res, { id: Date.now(), ...req.body }, 'Broadcast created successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getTriggers = async (req, res, next) => {
+  try {
+    sendSuccess(res, { data: [] }, 'Triggers fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createTrigger = async (req, res, next) => {
+  try {
+    sendSuccess(res, { id: Date.now(), ...req.body }, 'Trigger created successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMyNotifications,
   markAsRead,
-  markAllAsRead
+  markAllAsRead,
+  getBroadcasts,
+  createBroadcast,
+  getTriggers,
+  createTrigger
 };

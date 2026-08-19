@@ -22,7 +22,57 @@ const processPayout = async (req, res, next) => {
   }
 };
 
+const getPayouts = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Payouts retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getFailedPayouts = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Failed payouts retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getPayoutQueue = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Payout queue retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getPayoutLedger = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Payout ledger retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getProcessingPayouts = async (req, res, next) => {
+  try {
+    // Stub implementation
+    sendSuccess(res, { data: [] }, 'Processing payouts retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPendingPayouts,
-  processPayout
+  processPayout,
+  getPayouts,
+  getFailedPayouts,
+  getPayoutQueue,
+  getPayoutLedger,
+  getProcessingPayouts
 };

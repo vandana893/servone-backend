@@ -11,4 +11,10 @@ router.get('/', validate(notificationQuerySchema), notificationController.getMyN
 router.patch('/mark-all-read', notificationController.markAllAsRead);
 router.patch('/:id/read', validate(idSchema), notificationController.markAsRead);
 
+// Admin / Broadcast routes
+router.get('/broadcasts', notificationController.getBroadcasts);
+router.post('/broadcasts', notificationController.createBroadcast);
+router.get('/triggers', notificationController.getTriggers);
+router.post('/triggers', notificationController.createTrigger);
+
 module.exports = router;

@@ -16,6 +16,10 @@ const optionalAuth = (req, res, next) => {
 
 // Public routes
 router.get('/', optionalAuth, validate(queryContentSchema), contentController.getContent);
+router.get('/pages', optionalAuth, contentController.getPages);
+router.get('/seo', optionalAuth, contentController.getSeo);
+router.get('/faqs', optionalAuth, contentController.getFaqs);
+router.get('/policies', optionalAuth, contentController.getPolicies);
 router.get('/slug/:slug', contentController.getContentBySlug);
 
 // Admin only routes

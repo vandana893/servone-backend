@@ -40,9 +40,36 @@ const updateOfferStatus = async (req, res, next) => {
   }
 };
 
+const getPromocodes = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Promocodes retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getSales = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Sales retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getBanners = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Banners retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOffer,
   getActiveOffers,
   applyOffer,
-  updateOfferStatus
+  updateOfferStatus,
+  getPromocodes,
+  getSales,
+  getBanners
 };

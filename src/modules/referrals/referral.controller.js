@@ -69,9 +69,45 @@ const updateReferralStatus = async (req, res, next) => {
   }
 };
 
+const getPrograms = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Referral programs retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getReferrals = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Referrals retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getReferralCodes = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Referral codes retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getReferralRewards = async (req, res, next) => {
+  try {
+    return sendSuccess(res, { data: [] }, 'Referral rewards retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   applyReferralCode,
   getMyReferralHistory,
   getAdminReferralHistory,
-  updateReferralStatus
+  updateReferralStatus,
+  getPrograms,
+  getReferrals,
+  getReferralCodes,
+  getReferralRewards
 };
