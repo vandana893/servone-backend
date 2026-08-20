@@ -8,10 +8,10 @@ const auditLogger = (action, targetModel) => {
   return async (req, res, next) => {
     // We capture the original send/json method to log AFTER a successful response
     const originalJson = res.json;
-    
+
     res.json = function (body) {
       res.json = originalJson; // Restore original to prevent infinite loop
-      
+
       // Only log if the request was successful
       if (res.statusCode >= 200 && res.statusCode < 300) {
         try {
@@ -34,7 +34,7 @@ const auditLogger = (action, targetModel) => {
               ipAddress: req.ip,
               userAgent: req.get('User-Agent')
             });
-            
+
             // Save async without blocking the response
             log.save().catch(err => console.error('Audit Log Save Error:', err));
           }
@@ -42,10 +42,10 @@ const auditLogger = (action, targetModel) => {
           console.error('Audit Logger Error:', error);
         }
       }
-      
+
       return res.json(body);
     };
-    
+
     next();
   };
 };
