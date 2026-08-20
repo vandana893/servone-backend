@@ -26,11 +26,7 @@ router.get(
   referralController.getMyReferralHistory
 );
 
-// ==========================================
-// ADMIN ROUTES
-// ==========================================
 
-// Get all referrals
 router.get(
   '/admin/history',
   auth,
