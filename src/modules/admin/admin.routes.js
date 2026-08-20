@@ -83,6 +83,9 @@ router.patch('/:id/role', authorize('SuperAdmin'), validate(updateAdminRoleSchem
 
 // === SUPPORT TICKETS ===
 const adminSupportController = require('./admin.support.controller');
+const supportController = require('../support/support.controller');
+router.get('/support/tickets', requirePermission('Support'), supportController.getTickets);
+router.get('/support/tickets/:id', requirePermission('Support'), supportController.getTicketById);
 router.put('/support/tickets/:id/assign', requirePermission('Support'), adminSupportController.assignTicket);
 router.put('/support/tickets/:id/resolve', requirePermission('Support'), adminSupportController.resolveTicket);
 

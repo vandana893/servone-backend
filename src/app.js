@@ -15,13 +15,13 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: { success: false, message: 'Too many requests', error: { code: 'RATE_LIMIT_EXCEEDED' } }
-});
-app.use('/api', limiter);
+// Rate Limiting (Disabled for Dev)
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per windowMs
+//   message: { success: false, message: 'Too many requests', error: { code: 'RATE_LIMIT_EXCEEDED' } }
+// });
+// app.use('/api', limiter);
 
 // Parsing Middlewares
 app.use(express.json());
