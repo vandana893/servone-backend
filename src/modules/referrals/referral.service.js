@@ -1,5 +1,6 @@
 const ReferralHistory = require('./referral.model');
 const User = require('../users/user.model');
+const ReferralProgram = require('./referralProgram.model');
 
 /**
  * Apply a referral code for a new user
@@ -91,9 +92,27 @@ const updateReferralStatus = async (referralId, status, notes) => {
   return referral;
 };
 
+/**
+ * Create a new Referral Program (Admin only)
+ */
+const createProgram = async (programData) => {
+  const program = new ReferralProgram(programData);
+  await program.save();
+  return program;
+};
+
+/**
+ * Get all Referral Programs
+ */
+const getPrograms = async () => {
+  return await ReferralProgram.find().sort({ createdAt: -1 });
+};
+
 module.exports = {
   applyReferralCode,
   getUserReferralHistory,
   getAdminReferralHistory,
-  updateReferralStatus
+  updateReferralStatus,
+  createProgram,
+  getPrograms
 };

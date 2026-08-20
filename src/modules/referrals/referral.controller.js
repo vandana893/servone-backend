@@ -71,7 +71,17 @@ const updateReferralStatus = async (req, res, next) => {
 
 const getPrograms = async (req, res, next) => {
   try {
-    return sendSuccess(res, { data: [] }, 'Referral programs retrieved');
+    const programs = await referralService.getPrograms();
+    return sendSuccess(res, programs, 'Referral programs retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createProgram = async (req, res, next) => {
+  try {
+    const program = await referralService.createProgram(req.body);
+    return sendSuccess(res, program, 'Referral program created successfully', 201);
   } catch (error) {
     next(error);
   }
@@ -107,6 +117,7 @@ module.exports = {
   getAdminReferralHistory,
   updateReferralStatus,
   getPrograms,
+  createProgram,
   getReferrals,
   getReferralCodes,
   getReferralRewards
