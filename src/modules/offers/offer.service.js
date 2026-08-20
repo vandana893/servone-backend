@@ -78,9 +78,40 @@ const updateOfferStatus = async (offerId, isActive) => {
   return offer;
 };
 
+const getAllOffers = async () => {
+  return await Offer.find({}).sort({ createdAt: -1 });
+};
+
+const createBanner = async (payload) => {
+  const Banner = require('./banner.model');
+  const banner = new Banner(payload);
+  await banner.save();
+  return banner;
+};
+
+const getBanners = async () => {
+  const Banner = require('./banner.model');
+  return await Banner.find({}).sort({ createdAt: -1 });
+};
+
+const updateBannerStatus = async (id, status) => {
+  const Banner = require('./banner.model');
+  return await Banner.findByIdAndUpdate(id, { status }, { new: true });
+};
+
+const deleteBanner = async (id) => {
+  const Banner = require('./banner.model');
+  return await Banner.findByIdAndDelete(id);
+};
+
 module.exports = {
   createOffer,
   getActiveOffers,
+  getAllOffers,
   validateAndApplyOffer,
-  updateOfferStatus
+  updateOfferStatus,
+  createBanner,
+  getBanners,
+  updateBannerStatus,
+  deleteBanner
 };

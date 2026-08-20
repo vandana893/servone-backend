@@ -1,13 +1,12 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
-const env = require('./src/config/env');
-const Admin = require('./src/modules/admin/admin.model');
 
-mongoose.connect(env.mongodbUri).then(async () => {
-  const admins = await Admin.find({}, 'name email role status');
-  console.log('--- ADMINS ---');
-  console.log(JSON.stringify(admins, null, 2));
+async function checkAdmins() {
+  await mongoose.connect(process.env.MONGODB_URI);
+  const db = mongoose.connection.db;
+  const admins = await db.collection('admins').find({}).toArray();
+  console.log('Admins in DB:', admins.map(a => ({ email: a.email, password: a.password })));
   process.exit(0);
-}).catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+}
+
+checkAdmins();

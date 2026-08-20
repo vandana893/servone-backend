@@ -42,7 +42,8 @@ const updateOfferStatus = async (req, res, next) => {
 
 const getPromocodes = async (req, res, next) => {
   try {
-    return sendSuccess(res, { data: [] }, 'Promocodes retrieved');
+    const offers = await offerService.getAllOffers();
+    return sendSuccess(res, offers, 'Promocodes retrieved');
   } catch (error) {
     next(error);
   }
@@ -58,7 +59,38 @@ const getSales = async (req, res, next) => {
 
 const getBanners = async (req, res, next) => {
   try {
-    return sendSuccess(res, { data: [] }, 'Banners retrieved');
+    const banners = await offerService.getBanners();
+    return sendSuccess(res, banners, 'Banners retrieved');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createBanner = async (req, res, next) => {
+  try {
+    const banner = await offerService.createBanner(req.body);
+    return sendSuccess(res, banner, 'Banner created', 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateBannerStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const banner = await offerService.updateBannerStatus(id, status);
+    return sendSuccess(res, banner, 'Banner status updated');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteBanner = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await offerService.deleteBanner(id);
+    return sendSuccess(res, null, 'Banner deleted');
   } catch (error) {
     next(error);
   }
@@ -71,5 +103,8 @@ module.exports = {
   updateOfferStatus,
   getPromocodes,
   getSales,
-  getBanners
+  getBanners,
+  createBanner,
+  updateBannerStatus,
+  deleteBanner
 };

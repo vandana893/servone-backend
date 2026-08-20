@@ -37,6 +37,15 @@ const getUserById = async (req, res, next) => {
   }
 };
 
+const updateUser = async (req, res, next) => {
+  try {
+    const updatedUser = await userService.updateUserProfile(req.params.id, req.body);
+    sendSuccess(res, updatedUser, 'User updated successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateUserStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -77,6 +86,7 @@ const getActivityLogs = async (req, res, next) => {
 module.exports = {
   getUsers,
   getUserById,
+  updateUser,
   updateUserStatus,
   getUserStats,
   getLoginAttempts,

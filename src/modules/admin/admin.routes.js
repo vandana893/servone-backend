@@ -34,6 +34,7 @@ router.get('/users/stats', requirePermission('Users'), adminUserController.getUs
 router.get('/users/login-attempts', requirePermission('Users'), adminUserController.getLoginAttempts);
 router.get('/users/activity-logs', requirePermission('Users'), adminUserController.getActivityLogs);
 router.get('/users/:id', requirePermission('Users'), adminUserController.getUserById);
+router.put('/users/:id', requirePermission('Users'), adminUserController.updateUser);
 router.patch('/users/:id/status', requirePermission('Users'), adminUserController.updateUserStatus);
 
 // === PARTNERS ===
@@ -83,6 +84,9 @@ router.patch('/:id/role', authorize('SuperAdmin'), validate(updateAdminRoleSchem
 
 // === SUPPORT TICKETS ===
 const adminSupportController = require('./admin.support.controller');
+const supportController = require('../support/support.controller');
+router.get('/support/tickets', requirePermission('Support'), supportController.getTickets);
+router.get('/support/tickets/:id', requirePermission('Support'), supportController.getTicketById);
 router.put('/support/tickets/:id/assign', requirePermission('Support'), adminSupportController.assignTicket);
 router.put('/support/tickets/:id/resolve', requirePermission('Support'), adminSupportController.resolveTicket);
 

@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, enum: ['Male', 'Female', 'Other'] },
   language: { type: String, default: 'English' }, // Hindi/English
   addresses: [addressSchema],
-  referralCode: { type: String, unique: true },
+  referralCode: { type: String, unique: true, sparse: true },
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   walletBalance: { type: Number, default: 0 },
   status: { type: String, enum: ['ACTIVE', 'INACTIVE', 'BLOCKED'], default: 'ACTIVE' },

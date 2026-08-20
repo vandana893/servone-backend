@@ -34,4 +34,8 @@ router.get('/admin/promocodes', offerController.getPromocodes);
 router.get('/admin/sales', offerController.getSales);
 router.get('/admin/banners', offerController.getBanners);
 
+router.post('/admin/banners', offerController.createBanner);
+router.put('/admin/banners/:id/status', offerController.updateBannerStatus);
+router.delete('/admin/banners/:id', offerController.deleteBanner);
+
 module.exports = router;

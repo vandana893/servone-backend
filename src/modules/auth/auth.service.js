@@ -300,12 +300,16 @@ const generateTokensForAccount = async (accountId, accountType) => {
     expiresAt.setDate(expiresAt.getDate() + 7); // Default fallback
   }
 
-  await Auth.create({
-    userId: accountId,
-    userModel: accountType === 'USER' ? 'User' : (accountType === 'PARTNER' ? 'Partner' : 'Admin'),
-    refreshToken: refreshToken,
-    expiresAt
-  });
+  const userModelType = accountType === 'USER' ? 'User' : (accountType === 'PARTNER' ? 'Partner' : 'Admin');
+  
+  await Auth.findOneAndUpdate(
+    { userId: accountId, userModel: userModelType },
+    {
+      refreshToken: refreshToken,
+      expiresAt: expiresAt
+    },
+    { upsert: true, new: true }
+  );
 
   return { accessToken, refreshToken };
 };
