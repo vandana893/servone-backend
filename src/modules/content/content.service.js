@@ -133,7 +133,7 @@ const updateContent = async (id, data) => {
   return await Content.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 };
 
@@ -141,7 +141,7 @@ const updateContentStatus = async (id, isActive) => {
   const content = await Content.findByIdAndUpdate(
     id,
     { isActive },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
   if (!content) throwError('Content not found', 404);
   return content;

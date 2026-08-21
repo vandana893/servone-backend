@@ -23,7 +23,7 @@ const getAllUsers = async (query = {}, page = 1, limit = 10) => {
 };
 
 const updateUserStatus = async (userId, status) => {
-  const user = await User.findByIdAndUpdate(userId, { status }, { new: true, runValidators: true });
+  const user = await User.findByIdAndUpdate(userId, { status }, { returnDocument: 'after', runValidators: true });
   if (!user) throw new Error('User not found');
   return user;
 };
@@ -32,7 +32,7 @@ const updateUserProfile = async (userId, updateData) => {
   return await User.findByIdAndUpdate(
     userId,
     { $set: updateData },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).select('-password');
 };
 

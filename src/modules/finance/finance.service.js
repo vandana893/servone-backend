@@ -169,7 +169,7 @@ const updateTransactionStatus = async (id, status, referenceId = null, updatedBy
     return await Transaction.findByIdAndUpdate(
       id,
       { $set: update },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
   } catch (error) {
     if (error.code === 11000 && error.keyPattern && error.keyPattern.referenceId) {

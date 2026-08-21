@@ -136,7 +136,7 @@ const createTrigger = async (req, res, next) => {
         await NotificationTrigger.findOneAndUpdate(
           { id: t.id },
           t,
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: 'after' }
         );
       }
     }

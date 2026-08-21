@@ -34,7 +34,7 @@ const updatePartnerStatus = async (partnerId, status) => {
   const partner = await Partner.findByIdAndUpdate(
     partnerId, 
     { status }, 
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
   if (!partner) throwError('Partner not found', 404);
   return partner;
@@ -44,7 +44,7 @@ const updatePartnerProfile = async (partnerId, updateData) => {
   const partner = await Partner.findByIdAndUpdate(
     partnerId,
     { $set: updateData },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).select('-password');
   
   if (!partner) throwError('Partner not found', 404);

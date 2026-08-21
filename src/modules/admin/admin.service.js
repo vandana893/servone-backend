@@ -50,7 +50,7 @@ const updateProfile = async (accountId, data) => {
   const admin = await Admin.findByIdAndUpdate(
     accountId,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
   if (!admin) throwError('Admin not found', 'NOT_FOUND', 404);
   return admin;
@@ -100,7 +100,7 @@ const updateAdminStatus = async (id, status, currentUserRole) => {
   const admin = await Admin.findByIdAndUpdate(
     id,
     { status },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
   if (!admin) throwError('Admin not found', 'NOT_FOUND', 404);
   return admin;
@@ -114,7 +114,7 @@ const updateAdminRole = async (id, data, currentUserRole) => {
   const admin = await Admin.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
   if (!admin) throwError('Admin not found', 'NOT_FOUND', 404);
   return admin;

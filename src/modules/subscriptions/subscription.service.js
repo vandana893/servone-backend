@@ -124,7 +124,7 @@ const cancelSubscription = async (subscriptionId, accountId, accountType) => {
       status: { $ne: 'CANCELLED' } // Don't cancel already cancelled
     },
     { status: 'CANCELLED' },
-    { new: true } // Return updated doc
+    { returnDocument: 'after' } // Return updated doc
   );
 
   if (!subscription) {

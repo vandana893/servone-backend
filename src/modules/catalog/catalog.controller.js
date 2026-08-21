@@ -63,6 +63,15 @@ const deleteCategory = async (req, res, next) => {
 // ==========================================
 // Subcategories
 // ==========================================
+const getAllSubcategories = async (req, res, next) => {
+  try {
+    const result = await catalogService.getAllSubcategories(req.query);
+    sendSuccess(res, result, 'All subcategories fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getSubcategories = async (req, res, next) => {
   try {
     const result = await catalogService.getSubcategories(req.params.id, req.query);
@@ -186,6 +195,7 @@ module.exports = {
   updateCategoryStatus,
   deleteCategory,
   
+  getAllSubcategories,
   getSubcategories,
   getSubcategoryById,
   createSubcategory,

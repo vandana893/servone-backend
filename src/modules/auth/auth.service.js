@@ -308,7 +308,7 @@ const generateTokensForAccount = async (accountId, accountType) => {
       refreshToken: refreshToken,
       expiresAt: expiresAt
     },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 
   return { accessToken, refreshToken };

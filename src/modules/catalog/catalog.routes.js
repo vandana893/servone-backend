@@ -36,6 +36,7 @@ router.delete('/categories/:id', auth, authorize('SuperAdmin', 'Manager'), valid
 // Subcategories
 // ==========================================
 // Public/User/Partner access
+router.get('/subcategories', validate(categoryQuerySchema), catalogController.getAllSubcategories);
 router.get('/categories/:id/subcategories', validate(idSchema), validate(categoryQuerySchema), catalogController.getSubcategories);
 router.get('/subcategories/:id', validate(idSchema), catalogController.getSubcategoryById);
 

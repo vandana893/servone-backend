@@ -69,7 +69,7 @@ const validateAndApplyOffer = async (code, orderValue) => {
 };
 
 const updateOfferStatus = async (offerId, isActive) => {
-  const offer = await Offer.findByIdAndUpdate(offerId, { isActive }, { new: true });
+  const offer = await Offer.findByIdAndUpdate(offerId, { isActive }, { returnDocument: 'after' });
   if (!offer) {
     const error = new Error('Offer not found');
     error.statusCode = 404;
@@ -96,7 +96,7 @@ const getBanners = async () => {
 
 const updateBannerStatus = async (id, status) => {
   const Banner = require('./banner.model');
-  return await Banner.findByIdAndUpdate(id, { status }, { new: true });
+  return await Banner.findByIdAndUpdate(id, { status }, { returnDocument: 'after' });
 };
 
 const deleteBanner = async (id) => {

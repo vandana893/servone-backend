@@ -44,13 +44,13 @@ const updateCategory = async (id, data) => {
     if (exists) throwError('Category with this name already exists');
   }
   
-  const category = await Category.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+  const category = await Category.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
   if (!category) throwError('Category not found', 404);
   return category;
 };
 
 const updateCategoryStatus = async (id, isActive) => {
-  const category = await Category.findByIdAndUpdate(id, { isActive }, { new: true });
+  const category = await Category.findByIdAndUpdate(id, { isActive }, { returnDocument: 'after' });
   if (!category) throwError('Category not found', 404);
   
   if (!isActive) {
@@ -66,23 +66,16 @@ const deleteCategory = async (id) => {
   const category = await Category.findById(id);
   if (!category) throwError('Category not found', 404);
   
-  // Check dependencies
-  const hasSubcategories = await Subcategory.exists({ categoryId: id });
-  if (hasSubcategories) {
-    throwError('Cannot delete category because it has associated subcategories. Please deactivate it instead.');
-  }
-  
-  const hasServices = await Service.exists({ categoryId: id });
-  if (hasServices) {
-    throwError('Cannot delete category because it has associated services. Please deactivate it instead.');
-  }
-  
   // Checking bookings just in case, though services check usually suffices
   const hasBookings = await Booking.exists({ categoryId: id });
   if (hasBookings) {
     throwError('Cannot delete category because it is referenced in bookings. Please deactivate it instead.');
   }
 
+  // Cascade delete Subcategories and Services
+  await Service.deleteMany({ categoryId: id });
+  await Subcategory.deleteMany({ categoryId: id });
+  
   await Category.findByIdAndDelete(id);
   return { message: 'Category deleted successfully' };
 };
@@ -90,6 +83,20 @@ const deleteCategory = async (id) => {
 // ==========================================
 // Subcategories
 // ==========================================
+const getAllSubcategories = async (query) => {
+  const { isActive, page, limit } = query;
+  const filter = {};
+  if (isActive !== undefined) filter.isActive = isActive;
+  
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    Subcategory.find(filter).populate('categoryId', 'name').skip(skip).limit(limit).sort({ name: 1 }),
+    Subcategory.countDocuments(filter)
+  ]);
+  
+  return { data, total, page, limit };
+};
+
 const getSubcategories = async (categoryId, query) => {
   const { isActive, page, limit } = query;
   const filter = { categoryId };
@@ -133,12 +140,12 @@ const updateSubcategory = async (id, data) => {
     if (exists) throwError('Subcategory with this name already exists under the same category');
   }
   
-  const updated = await Subcategory.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+  const updated = await Subcategory.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
   return updated;
 };
 
 const updateSubcategoryStatus = async (id, isActive) => {
-  const subcategory = await Subcategory.findByIdAndUpdate(id, { isActive }, { new: true });
+  const subcategory = await Subcategory.findByIdAndUpdate(id, { isActive }, { returnDocument: 'after' });
   if (!subcategory) throwError('Subcategory not found', 404);
   
   if (!isActive) {
@@ -153,10 +160,13 @@ const deleteSubcategory = async (id) => {
   const subcategory = await Subcategory.findById(id);
   if (!subcategory) throwError('Subcategory not found', 404);
   
-  const hasServices = await Service.exists({ subcategoryId: id });
-  if (hasServices) {
-    throwError('Cannot delete subcategory because it has associated services. Please deactivate it instead.');
+  const hasBookings = await Booking.exists({ subcategoryId: id });
+  if (hasBookings) {
+    throwError('Cannot delete subcategory because it is referenced in bookings. Please deactivate it instead.');
   }
+
+  // Cascade delete Services
+  await Service.deleteMany({ subcategoryId: id });
 
   await Subcategory.findByIdAndDelete(id);
   return { message: 'Subcategory deleted successfully' };
@@ -246,7 +256,7 @@ const updateService = async (id, data) => {
     if (exists) throwError('Service with this name already exists in the selected subcategory');
   }
 
-  const updated = await Service.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+  const updated = await Service.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
   return updated;
 };
 
@@ -263,7 +273,7 @@ const updateServiceStatus = async (id, isActive) => {
     if (!subcategory || !subcategory.isActive) throwError('Cannot activate service because its subcategory is inactive');
   }
 
-  return await Service.findByIdAndUpdate(id, { isActive }, { new: true });
+  return await Service.findByIdAndUpdate(id, { isActive }, { returnDocument: 'after' });
 };
 
 const deleteService = async (id) => {
@@ -287,6 +297,7 @@ module.exports = {
   updateCategoryStatus,
   deleteCategory,
   
+  getAllSubcategories,
   getSubcategories,
   getSubcategoryById,
   createSubcategory,
