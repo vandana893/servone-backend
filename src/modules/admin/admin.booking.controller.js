@@ -59,11 +59,21 @@ const updateTimeline = async (req, res, next) => {
   }
 };
 
+const getBookingStats = async (req, res, next) => {
+  try {
+    const stats = await bookingService.getBookingStats();
+    sendSuccess(res, stats, 'Booking stats retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getBookings,
   getBookingById,
   assignBooking,
   cancelBooking,
   rescheduleBooking,
-  updateTimeline
+  updateTimeline,
+  getBookingStats
 };

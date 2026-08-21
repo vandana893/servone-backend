@@ -56,6 +56,7 @@ router.delete('/partners/:id/workers/:workerId', requirePermission('Partners'), 
 
 // === BOOKINGS ===
 router.get('/bookings', requirePermission('Bookings'), adminBookingController.getBookings);
+router.get('/bookings/stats', requirePermission('Bookings'), adminBookingController.getBookingStats);
 router.get('/bookings/:id', requirePermission('Bookings'), adminBookingController.getBookingById);
 router.put('/bookings/:id/assign', requirePermission('Bookings'), adminBookingController.assignBooking);
 router.put('/bookings/:id/cancel', requirePermission('Bookings'), adminBookingController.cancelBooking);

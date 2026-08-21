@@ -177,17 +177,22 @@ const getPolicies = async () => {
 const bulkUpdatePages = async (pages) => {
   // Clear existing pages and insert new ones (or upsert by some logic, but wiping and recreating is easiest for CMS config)
   await Content.deleteMany({ type: 'PAGE' });
-  const docs = pages.map(p => ({
-    ...p,
-    type: 'PAGE',
-    name: p.name,
-    route: p.route,
-    platform: p.platform,
-    headline: p.headline,
-    subHeadline: p.subHeadline,
-    image: p.image,
-    status: p.status
-  }));
+  const docs = pages.map(p => {
+    const doc = {
+      ...p,
+      type: 'PAGE',
+      name: p.name,
+      route: p.route,
+      platform: p.platform,
+      headline: p.headline,
+      subHeadline: p.subHeadline,
+      image: p.image,
+      status: p.status
+    };
+    delete doc._id;
+    delete doc.id;
+    return doc;
+  });
   await Content.insertMany(docs);
   return docs;
 };

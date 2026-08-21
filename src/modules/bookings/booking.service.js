@@ -420,6 +420,38 @@ const adminUpdateTimeline = async (bookingId, note, auth) => {
   return booking;
 };
 
+const getBookingStats = async () => {
+  const stats = await Booking.aggregate([
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const result = {
+    total: 0,
+    active: 0,
+    completed: 0,
+    cancelled: 0,
+    disputed: 0
+  };
+
+  stats.forEach(s => {
+    const status = s._id;
+    const count = s.count;
+    result.total += count;
+    
+    if (status === 'COMPLETED') result.completed += count;
+    else if (status === 'CANCELLED' || status === 'REJECTED') result.cancelled += count;
+    else if (status === 'DISPUTED') result.disputed += count;
+    else result.active += count; // PENDING, ACCEPTED, ASSIGNED, EN_ROUTE, IN_PROGRESS, etc.
+  });
+
+  return result;
+};
+
 module.exports = {
   createBooking,
   getBookings,
@@ -434,5 +466,6 @@ module.exports = {
   getEligibleWorkers,
   assignWorker,
   adminAssignBooking,
-  adminUpdateTimeline
+  adminUpdateTimeline,
+  getBookingStats
 };
