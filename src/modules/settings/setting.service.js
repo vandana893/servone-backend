@@ -17,7 +17,7 @@ const upsertSetting = async (key, value, description, isPublic) => {
   return await Setting.findOneAndUpdate(
     { key: key.toUpperCase() },
     updateData,
-    { new: true, upsert: true, runValidators: true }
+    { returnDocument: 'after', upsert: true, runValidators: true }
   );
 };
 

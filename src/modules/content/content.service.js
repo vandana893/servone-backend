@@ -154,11 +154,97 @@ const deleteContent = async (id) => {
   return await Content.findByIdAndDelete(id);
 };
 
+const getPages = async () => {
+  const pages = await Content.find({ type: 'PAGE' });
+  return pages;
+};
+
+const getSeo = async () => {
+  const seo = await Content.find({ type: 'PAGE' }); // Assuming SEO is attached to pages
+  return seo;
+};
+
+const getFaqs = async () => {
+  const faqs = await Content.find({ type: 'FAQ' });
+  return faqs;
+};
+
+const getPolicies = async () => {
+  const policies = await Content.find({ type: 'POLICY' });
+  return policies;
+};
+
+const bulkUpdatePages = async (pages) => {
+  // Clear existing pages and insert new ones (or upsert by some logic, but wiping and recreating is easiest for CMS config)
+  await Content.deleteMany({ type: 'PAGE' });
+  const docs = pages.map(p => ({
+    ...p,
+    type: 'PAGE',
+    name: p.name,
+    route: p.route,
+    platform: p.platform,
+    headline: p.headline,
+    subHeadline: p.subHeadline,
+    image: p.image,
+    status: p.status
+  }));
+  await Content.insertMany(docs);
+  return docs;
+};
+
+const bulkUpdateSeo = async (seoList) => {
+  // Assuming SEO is just fields on the PAGE documents
+  for (const seo of seoList) {
+    if (seo.id || seo._id) {
+      await Content.findByIdAndUpdate(seo.id || seo._id, {
+        seoTitle: seo.title,
+        seoDescription: seo.desc,
+        seoKeywords: seo.kw
+      });
+    }
+  }
+  return true;
+};
+
+const bulkUpdateFaqs = async (faqs) => {
+  await Content.deleteMany({ type: 'FAQ' });
+  const docs = faqs.map(f => ({
+    ...f,
+    type: 'FAQ',
+    category: f.category,
+    question: f.question,
+    answer: f.answer,
+    status: f.status
+  }));
+  await Content.insertMany(docs);
+  return docs;
+};
+
+const bulkUpdatePolicies = async (policies) => {
+  await Content.deleteMany({ type: 'POLICY' });
+  const docs = Object.keys(policies).map(key => ({
+    type: 'POLICY',
+    name: key,
+    content: policies[key],
+    status: 'Live'
+  }));
+  await Content.insertMany(docs);
+  return docs;
+};
+
 module.exports = {
   createContent,
   getContent,
   getContentBySlug,
   updateContent,
   updateContentStatus,
-  deleteContent
+  deleteContent,
+  getPages,
+  getSeo,
+  getFaqs,
+  getPolicies,
+  bulkUpdatePages,
+  bulkUpdateSeo,
+  bulkUpdateFaqs,
+  bulkUpdatePolicies
 };

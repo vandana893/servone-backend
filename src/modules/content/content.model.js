@@ -9,15 +9,25 @@ const contentSchema = new mongoose.Schema({
   linkUrl: String,
   
   // For FAQs
+  category: String,
   question: String,
   answer: String,
+  status: String,
   
   // For Pages/Policies/Blogs
   slug: { type: String, unique: true, sparse: true }, // URL slug
+  name: String, // Also used for policy name
+  route: String,
+  platform: String,
+  headline: String,
+  subHeadline: String,
+  image: String,
+  
   content: String, // HTML or Markdown content
   author: String,
   seoTitle: String,
   seoDescription: String,
+  seoKeywords: String,
   
   displayOrder: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true }

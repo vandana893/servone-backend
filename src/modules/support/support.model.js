@@ -23,7 +23,7 @@ const supportTicketSchema = new mongoose.Schema({
   subject: { type: String, required: true, trim: true, maxlength: 200 },
   description: { type: String, required: true, trim: true, maxlength: 5000 },
   
-  status: { type: String, enum: ['Open', 'In Progress', 'Resolved', 'Closed'], default: 'Open' },
+  status: { type: String, enum: ['Open', 'In Progress', 'Resolved', 'Closed', 'Penalty Applied'], default: 'Open' },
   priority: { type: String, enum: ['Low', 'Medium', 'High', 'Urgent'], default: 'Medium' },
   
   assignedAdminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },

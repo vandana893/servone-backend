@@ -87,6 +87,15 @@ const createProgram = async (req, res, next) => {
   }
 };
 
+const deleteProgram = async (req, res, next) => {
+  try {
+    await referralService.deleteProgram(req.params.id);
+    return sendSuccess(res, null, 'Referral program deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getReferrals = async (req, res, next) => {
   try {
     return sendSuccess(res, { data: [] }, 'Referrals retrieved');
@@ -118,6 +127,7 @@ module.exports = {
   updateReferralStatus,
   getPrograms,
   createProgram,
+  deleteProgram,
   getReferrals,
   getReferralCodes,
   getReferralRewards

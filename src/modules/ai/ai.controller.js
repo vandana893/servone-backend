@@ -3,8 +3,8 @@ const { sendSuccess } = require('../../utils/response');
 
 const chatIntent = async (req, res, next) => {
   try {
-    const { message } = req.body;
-    const result = await aiService.resolveIntent(message);
+    const { message, location } = req.body;
+    const result = await aiService.resolveIntent(message, location);
     return sendSuccess(res, result, 'AI response generated');
   } catch (error) {
     next(error);

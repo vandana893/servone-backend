@@ -108,7 +108,7 @@ const getPartnerStats = async (req, res, next) => {
 const getAllWorkers = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'All workers retrieved successfully');
+    sendSuccess(res, [], 'All workers retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -117,7 +117,7 @@ const getAllWorkers = async (req, res, next) => {
 const getWorkerComplaints = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Worker complaints retrieved successfully');
+    sendSuccess(res, [], 'Worker complaints retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -126,7 +126,7 @@ const getWorkerComplaints = async (req, res, next) => {
 const getWorkerAvailability = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Worker availability retrieved successfully');
+    sendSuccess(res, [], 'Worker availability retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -135,7 +135,7 @@ const getWorkerAvailability = async (req, res, next) => {
 const getWorkerAssignments = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Worker assignments retrieved successfully');
+    sendSuccess(res, [], 'Worker assignments retrieved successfully');
   } catch (error) {
     next(error);
   }

@@ -108,11 +108,19 @@ const getPrograms = async () => {
   return await ReferralProgram.find().sort({ createdAt: -1 });
 };
 
+/**
+ * Delete a Referral Program (Admin only)
+ */
+const deleteProgram = async (id) => {
+  return await ReferralProgram.findByIdAndDelete(id);
+};
+
 module.exports = {
   applyReferralCode,
   getUserReferralHistory,
   getAdminReferralHistory,
   updateReferralStatus,
   createProgram,
-  getPrograms
+  getPrograms,
+  deleteProgram
 };

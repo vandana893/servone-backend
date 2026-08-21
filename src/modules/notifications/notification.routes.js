@@ -14,6 +14,7 @@ router.patch('/:id/read', validate(idSchema), notificationController.markAsRead)
 // Admin / Broadcast routes
 router.get('/broadcasts', notificationController.getBroadcasts);
 router.post('/broadcasts', notificationController.createBroadcast);
+router.delete('/broadcasts/:id', notificationController.deleteBroadcast);
 router.get('/triggers', notificationController.getTriggers);
 router.post('/triggers', notificationController.createTrigger);
 

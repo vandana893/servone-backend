@@ -27,6 +27,11 @@ router.use(auth);
 router.use(authorize('SuperAdmin', 'Manager'));
 
 router.post('/', validate(createContentSchema), contentController.createContent);
+router.post('/pages/bulk', contentController.bulkUpdatePages);
+router.post('/seo/bulk', contentController.bulkUpdateSeo);
+router.post('/faqs/bulk', contentController.bulkUpdateFaqs);
+router.post('/policies/bulk', contentController.bulkUpdatePolicies);
+
 router.put('/:id', validate(idSchema), validate(updateContentSchema), contentController.updateContent);
 router.patch('/:id/status', validate(idSchema), validate(contentStatusSchema), contentController.updateContentStatus);
 router.delete('/:id', validate(idSchema), contentController.deleteContent);

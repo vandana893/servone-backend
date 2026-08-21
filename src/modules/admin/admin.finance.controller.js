@@ -25,7 +25,7 @@ const processPayout = async (req, res, next) => {
 const getPayouts = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Payouts retrieved successfully');
+    sendSuccess(res, [], 'Payouts retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -34,7 +34,7 @@ const getPayouts = async (req, res, next) => {
 const getFailedPayouts = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Failed payouts retrieved successfully');
+    sendSuccess(res, [], 'Failed payouts retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -43,7 +43,7 @@ const getFailedPayouts = async (req, res, next) => {
 const getPayoutQueue = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Payout queue retrieved successfully');
+    sendSuccess(res, [], 'Payout queue retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -52,7 +52,7 @@ const getPayoutQueue = async (req, res, next) => {
 const getPayoutLedger = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Payout ledger retrieved successfully');
+    sendSuccess(res, [], 'Payout ledger retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -61,7 +61,7 @@ const getPayoutLedger = async (req, res, next) => {
 const getProcessingPayouts = async (req, res, next) => {
   try {
     // Stub implementation
-    sendSuccess(res, { data: [] }, 'Processing payouts retrieved successfully');
+    sendSuccess(res, [], 'Processing payouts retrieved successfully');
   } catch (error) {
     next(error);
   }

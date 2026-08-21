@@ -30,7 +30,7 @@ const addMessageSchema = {
 
 const updateTicketStatusSchema = {
   body: Joi.object({
-    status: Joi.string().valid('Open', 'In Progress', 'Resolved', 'Closed').required(),
+    status: Joi.string().valid('Open', 'In Progress', 'Resolved', 'Closed', 'Penalty Applied').required(),
     resolutionNote: Joi.string().trim().max(2000)
   }).unknown(false)
 };

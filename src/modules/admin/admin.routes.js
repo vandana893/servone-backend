@@ -77,11 +77,6 @@ const adminSubscriptionController = require('./admin.subscription.controller');
 router.get('/subscriptions', requirePermission('Subscriptions'), adminSubscriptionController.getAllSubscriptions);
 router.get('/subscriptions/:id', requirePermission('Subscriptions'), adminSubscriptionController.getSubscriptionById);
 
-// Admin Management (ID routes moved to bottom to prevent shadowing static routes like /users)
-router.get('/:id', authorize('SuperAdmin'), adminController.getAdminById);
-router.patch('/:id/status', authorize('SuperAdmin'), validate(updateAdminStatusSchema), adminController.updateAdminStatus);
-router.patch('/:id/role', authorize('SuperAdmin'), validate(updateAdminRoleSchema), adminController.updateAdminRole);
-
 // === SUPPORT TICKETS ===
 const adminSupportController = require('./admin.support.controller');
 const supportController = require('../support/support.controller');
@@ -89,6 +84,12 @@ router.get('/support/tickets', requirePermission('Support'), supportController.g
 router.get('/support/tickets/:id', requirePermission('Support'), supportController.getTicketById);
 router.put('/support/tickets/:id/assign', requirePermission('Support'), adminSupportController.assignTicket);
 router.put('/support/tickets/:id/resolve', requirePermission('Support'), adminSupportController.resolveTicket);
+
+// Admin Management (ID routes moved to bottom to prevent shadowing static routes like /users)
+router.get('/:id', authorize('SuperAdmin'), adminController.getAdminById);
+router.patch('/:id/status', authorize('SuperAdmin'), validate(updateAdminStatusSchema), adminController.updateAdminStatus);
+router.patch('/:id/role', authorize('SuperAdmin'), validate(updateAdminRoleSchema), adminController.updateAdminRole);
+
 
 // === REPORTS ===
 const adminReportController = require('./admin.report.controller');

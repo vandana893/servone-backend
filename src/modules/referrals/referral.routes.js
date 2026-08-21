@@ -45,6 +45,7 @@ router.put(
 
 router.get('/admin/referral-programs', auth, authorize('SuperAdmin', 'Manager'), referralController.getPrograms);
 router.post('/admin/referral-programs', auth, authorize('SuperAdmin', 'Manager'), referralController.createProgram);
+router.delete('/admin/referral-programs/:id', auth, authorize('SuperAdmin', 'Manager'), referralController.deleteProgram);
 router.get('/admin/referrals', auth, authorize('SuperAdmin', 'Manager'), referralController.getReferrals);
 router.get('/admin/referral-codes', auth, authorize('SuperAdmin', 'Manager'), referralController.getReferralCodes);
 router.get('/admin/referral-rewards', auth, authorize('SuperAdmin', 'Manager'), referralController.getReferralRewards);
