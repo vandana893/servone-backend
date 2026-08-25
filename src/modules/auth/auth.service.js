@@ -7,6 +7,7 @@ const OTP = require('./otp.model');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const env = require('../../config/env');
+const { uploadToCloudinary } = require('../../utils/upload');
 
 // Dummy OTP sender for development
 const sendSms = async (phone, otp) => {
@@ -150,11 +151,45 @@ const verifyPartnerOtp = async (phone, otp) => {
 };
 
 const registerPartner = async (data) => {
-  const { name, phone, email, address, partnerType } = data;
+  const { name, phone, email, address, partnerType, documents, photo } = data;
 
   const existingPartner = await Partner.findOne({ phone });
   if (existingPartner) {
     throw new Error('Partner with this phone number already exists');
+  }
+  
+  let uploadedPhotoUrl = null;
+  if (photo) {
+    try {
+      const base64Data = photo.replace(/^data:image\/\w+;base64,/, '').replace(/^data:application\/pdf;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      const result = await uploadToCloudinary(buffer, 'servone/profiles');
+      uploadedPhotoUrl = result.secure_url;
+    } catch (err) {
+      console.error('Failed to upload profile photo to Cloudinary', err);
+    }
+  }
+
+  const processedDocuments = [];
+  if (documents && Array.isArray(documents) && documents.length > 0) {
+    for (const doc of documents) {
+      if (doc.base64) {
+        try {
+          // Extract base64 content
+          const base64Data = doc.base64.replace(/^data:image\/\w+;base64,/, '').replace(/^data:application\/pdf;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          const result = await uploadToCloudinary(buffer, 'servone/documents');
+          processedDocuments.push({
+            name: doc.name || 'Document',
+            url: result.secure_url,
+            status: 'Pending'
+          });
+        } catch (err) {
+          console.error('Failed to upload document to Cloudinary', err);
+          throw new Error('Failed to process documents during registration');
+        }
+      }
+    }
   }
 
   const partner = await Partner.create({
@@ -163,8 +198,10 @@ const registerPartner = async (data) => {
     email,
     address: address ? { locality: address } : undefined,
     partnerType,
+    photo: uploadedPhotoUrl,
     status: 'PENDING',
-    verificationStatus: 'PENDING'
+    verificationStatus: 'PENDING',
+    documents: processedDocuments
   });
 
   const tokens = await generateTokensForAccount(partner._id, 'PARTNER');

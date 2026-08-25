@@ -10,6 +10,15 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+const getDashboardStats = async (req, res, next) => {
+  try {
+    const stats = await partnerService.getDashboardStats(req.auth.accountId);
+    sendSuccess(res, stats, 'Dashboard stats fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateProfile = async (req, res, next) => {
   try {
     const partner = await partnerService.updatePartnerProfile(req.auth.accountId, req.body);
@@ -69,6 +78,7 @@ const verifyKyc = async (req, res, next) => {
 
 module.exports = {
   getProfile,
+  getDashboardStats,
   updateProfile,
   addWorker,
   updateWorker,

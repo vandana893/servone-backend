@@ -1,6 +1,7 @@
 const Booking = require('./booking.model');
 const Partner = require('../partners/partner.model');
 const Service = require('../catalog/service.model');
+const notificationService = require('../notifications/notification.service');
 
 // Helper for auth model name
 const getModelName = (accountType) => {
@@ -73,9 +74,9 @@ const getBookings = async (query, auth) => {
 
 const getBookingById = async (bookingId, auth) => {
   const booking = await Booking.findById(bookingId)
-    .populate('serviceId', 'name description pricingModel')
+    .populate('serviceId', 'name description pricingModel category')
     .populate('userId', 'name phone email')
-    .populate('partnerId', 'name businessName phone');
+    .populate('partnerId', 'name businessName phone workers rating');
     
   if (!booking) return null;
 
@@ -94,7 +95,16 @@ const getBookingById = async (bookingId, auth) => {
     return null; // Access denied
   }
 
-  return booking;
+  // Attach worker data if workerId is present and partner is a BSP with workers
+  let bookingData = booking.toObject();
+  if (bookingData.workerId && bookingData.partnerId && bookingData.partnerId.workers) {
+    const worker = bookingData.partnerId.workers.find(w => w._id.toString() === bookingData.workerId.toString());
+    if (worker) {
+      bookingData.worker = worker;
+    }
+  }
+
+  return bookingData;
 };
 
 const getTimeline = async (bookingId, auth) => {
@@ -157,6 +167,20 @@ const updateBookingStatus = async (bookingId, updateData, auth) => {
   });
 
   await booking.save();
+
+  // Send Notification
+  try {
+    await notificationService.createNotification({
+      userId: booking.userId,
+      userModel: 'User',
+      title: 'Booking Update',
+      message: `Your booking ${booking.bookingId || booking._id} status is now ${status}.`,
+      type: 'Booking',
+    });
+  } catch (err) {
+    console.error('Failed to send notification', err);
+  }
+
   return booking;
 };
 
@@ -368,37 +392,53 @@ const assignWorker = async (bookingId, workerId, auth, isReassign = false) => {
   return booking;
 };
 
+const mongoose = require('mongoose');
+
+const throwError = (msg, status = 400) => {
+  const err = new Error(msg);
+  err.statusCode = status;
+  throw err;
+};
+
 const adminAssignBooking = async (bookingId, partnerId, workerId, auth) => {
-  if (auth.accountType !== 'ADMIN') {
-    throw new Error('Only admins can use manual assignment');
+  try {
+    if (auth.accountType !== 'ADMIN') {
+      throwError('Only admins can use manual assignment', 403);
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) throwError('Invalid Booking ID format', 400);
+    const booking = await Booking.findById(bookingId);
+    if (!booking) throwError('Booking not found', 404);
+
+    if (!mongoose.Types.ObjectId.isValid(partnerId)) throwError('Invalid Partner ID format. Please copy the 24-character ID from the Partners list.', 400);
+    const partner = await Partner.findById(partnerId);
+    if (!partner) throwError('Partner not found', 404);
+
+    booking.partnerId = partnerId;
+    
+    if (workerId) {
+      if (!mongoose.Types.ObjectId.isValid(workerId)) throwError('Invalid Worker ID format.', 400);
+      const worker = partner.workers.id(workerId);
+      if (!worker) throwError('Worker not found for this partner', 404);
+      booking.workerId = workerId;
+    } else {
+      booking.workerId = undefined;
+    }
+
+    booking.status = 'ASSIGNED';
+    booking.timeline.push({
+      status: 'ASSIGNED',
+      note: 'Assigned manually by Admin',
+      updatedBy: auth.accountId,
+      updatedByModel: 'Admin'
+    });
+
+    await booking.save();
+    return booking;
+  } catch (error) {
+    console.error('Error in adminAssignBooking:', error);
+    throw error;
   }
-
-  const booking = await Booking.findById(bookingId);
-  if (!booking) throw new Error('Booking not found');
-
-  const partner = await Partner.findById(partnerId);
-  if (!partner) throw new Error('Partner not found');
-
-  booking.partnerId = partnerId;
-  
-  if (workerId) {
-    const worker = partner.workers.id(workerId);
-    if (!worker) throw new Error('Worker not found for this partner');
-    booking.workerId = workerId;
-  } else {
-    booking.workerId = null;
-  }
-
-  booking.status = 'ASSIGNED';
-  booking.timeline.push({
-    status: 'ASSIGNED',
-    note: 'Assigned manually by Admin',
-    updatedBy: auth.accountId,
-    updatedByModel: 'Admin'
-  });
-
-  await booking.save();
-  return booking;
 };
 
 const adminUpdateTimeline = async (bookingId, note, auth) => {

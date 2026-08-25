@@ -19,7 +19,14 @@ const partnerRegisterSchema = {
     phone: Joi.string().trim().max(20).required(),
     email: Joi.string().trim().email().lowercase().max(255).optional(),
     address: Joi.string().trim().max(500).optional(),
-    partnerType: Joi.string().valid('ISP', 'BSP', 'BS').required()
+    partnerType: Joi.string().valid('ISP', 'BSP', 'BS').required(),
+    photo: Joi.string().optional(),
+    documents: Joi.array().items(
+      Joi.object({
+        name: Joi.string().required(),
+        base64: Joi.string().required()
+      })
+    ).optional()
   }).unknown(false)
 };
 

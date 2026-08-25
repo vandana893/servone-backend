@@ -43,6 +43,7 @@ router.get('/partners/stats', requirePermission('Partners'), adminPartnerControl
 router.get('/partners/:id', requirePermission('Partners'), adminPartnerController.getPartnerById);
 router.patch('/partners/:id/status', requirePermission('Partners'), adminPartnerController.updatePartnerStatus);
 router.patch('/partners/:id/kyc-verify', requirePermission('PartnerVerification'), adminPartnerController.verifyPartnerKyc);
+router.delete('/partners/:id', requirePermission('Partners'), adminPartnerController.deletePartner);
 
 // Worker Management
 router.get('/workers', requirePermission('Partners'), adminPartnerController.getAllWorkers);

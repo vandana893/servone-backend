@@ -20,6 +20,7 @@ router.use(requirePartner);
 
 // Profile routes (ISP, BSP, BS)
 router.get('/profile', partnerController.getProfile);
+router.get('/me/dashboard', partnerController.getDashboardStats);
 router.put('/profile', validate(updatePartnerProfileSchema), partnerController.updateProfile);
 
 // Worker routes (BSP only)

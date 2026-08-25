@@ -12,8 +12,14 @@ const env = require('./config/env');
 const app = express();
 
 // Security Middlewares
-app.use(helmet());
-app.use(cors());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Bypass-Tunnel-Reminder']
+}));
 
 // Rate Limiting (Disabled for Dev)
 // const limiter = rateLimit({

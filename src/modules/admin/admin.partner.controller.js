@@ -39,6 +39,19 @@ const getPartnerById = async (req, res, next) => {
   }
 };
 
+const deletePartner = async (req, res, next) => {
+  try {
+    const partnerId = req.params.id;
+    const partner = await partnerService.getPartnerById(partnerId);
+    if (!partner) return sendError(res, 'Partner not found', 'NOT_FOUND', 404);
+    
+    await partnerService.deletePartner(partnerId);
+    sendSuccess(res, null, 'Partner deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updatePartnerStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -144,6 +157,7 @@ const getWorkerAssignments = async (req, res, next) => {
 module.exports = {
   getPartners,
   getPartnerById,
+  deletePartner,
   updatePartnerStatus,
   verifyPartnerKyc,
   getWorkers,
