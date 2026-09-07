@@ -113,9 +113,10 @@ const submitKyc = async (partnerId, kycData) => {
   if (!partner) throwError('Partner not found', 404);
 
   partner.kycDetails = {
-    aadharNumber: kycData.aadharNumber,
-    panNumber: kycData.panNumber,
-    tradeLicenseNumber: kycData.tradeLicenseNumber
+    ...partner.kycDetails,
+    ...(kycData.aadharNumber && { aadharNumber: kycData.aadharNumber }),
+    ...(kycData.panNumber && { panNumber: kycData.panNumber }),
+    ...(kycData.tradeLicenseNumber && { tradeLicenseNumber: kycData.tradeLicenseNumber })
   };
   
   if (kycData.documents && Array.isArray(kycData.documents)) {

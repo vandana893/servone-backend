@@ -63,8 +63,8 @@ const workerIdSchema = {
 
 const submitKycSchema = {
   body: Joi.object({
-    aadharNumber: Joi.string().trim().required(),
-    panNumber: Joi.string().trim().required(),
+    aadharNumber: Joi.string().trim().optional().allow(''),
+    panNumber: Joi.string().trim().optional().allow(''),
     tradeLicenseNumber: Joi.string().trim().optional().allow(''),
     documents: Joi.array().items(
       Joi.object({
