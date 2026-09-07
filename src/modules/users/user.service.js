@@ -89,6 +89,12 @@ const deleteUserAddress = async (userId, addressId) => {
   return user.addresses;
 };
 
+const deleteUser = async (userId) => {
+  const user = await User.findByIdAndDelete(userId);
+  if (!user) throw new Error('User not found');
+  return user;
+};
+
 module.exports = {
   getUserById,
   getAllUsers,
@@ -96,5 +102,6 @@ module.exports = {
   updateUserProfile,
   addUserAddress,
   updateUserAddress,
-  deleteUserAddress
+  deleteUserAddress,
+  deleteUser
 };

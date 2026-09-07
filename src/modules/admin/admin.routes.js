@@ -36,6 +36,7 @@ router.get('/users/activity-logs', requirePermission('Users'), adminUserControll
 router.get('/users/:id', requirePermission('Users'), adminUserController.getUserById);
 router.put('/users/:id', requirePermission('Users'), adminUserController.updateUser);
 router.patch('/users/:id/status', requirePermission('Users'), adminUserController.updateUserStatus);
+router.delete('/users/:id', requirePermission('Users'), adminUserController.deleteUser);
 
 // === PARTNERS ===
 router.get('/partners', requirePermission('Partners'), adminPartnerController.getPartners);

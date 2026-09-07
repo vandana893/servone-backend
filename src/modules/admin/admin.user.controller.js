@@ -83,6 +83,15 @@ const getActivityLogs = async (req, res, next) => {
   }
 };
 
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await userService.deleteUser(req.params.id);
+    sendSuccess(res, user, 'User deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
@@ -90,5 +99,6 @@ module.exports = {
   updateUserStatus,
   getUserStats,
   getLoginAttempts,
-  getActivityLogs
+  getActivityLogs,
+  deleteUser
 };
