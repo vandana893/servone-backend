@@ -126,6 +126,9 @@ const submitKyc = async (partnerId, kycData) => {
           const base64Data = doc.base64.replace(/^data:image\/\w+;base64,/, '').replace(/^data:application\/pdf;base64,/, '');
           const buffer = Buffer.from(base64Data, 'base64');
           const result = await uploadToCloudinary(buffer, `partners/${partner.phone}/documents`);
+          if (doc.name === 'Selfie') {
+            partner.photo = result.secure_url;
+          }
           partner.documents.push({
             name: doc.name,
             url: result.secure_url,

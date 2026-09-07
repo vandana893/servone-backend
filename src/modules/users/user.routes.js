@@ -12,6 +12,7 @@ router.use(auth);
 // Profile routes
 router.get('/profile', userController.getProfile);
 router.put('/profile', validate(updateProfileSchema), userController.updateProfile);
+router.get('/mock-partner', userController.getMockPartner);
 
 // Address routes
 router.get('/addresses', userController.getAddresses);

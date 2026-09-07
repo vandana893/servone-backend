@@ -1,5 +1,6 @@
 const userService = require('./user.service');
 const { sendSuccess, sendError } = require('../../utils/response');
+const Partner = require('../partners/partner.model');
 
 const getProfile = async (req, res, next) => {
   try {
@@ -59,11 +60,37 @@ const deleteAddress = async (req, res, next) => {
   }
 };
 
+const getMockPartner = async (req, res, next) => {
+  try {
+    // Find a partner that has a photo (recently updated)
+    const partner = await Partner.findOne({ photo: { $ne: null } }).sort({ updatedAt: -1 });
+    if (!partner) {
+      return sendSuccess(res, null, 'No mock partner found');
+    }
+    
+    // Format to match what UI expects
+    const mockProvider = {
+      id: partner._id,
+      name: partner.name || partner.companyName || 'Verified Partner',
+      rating: 4.8,
+      reviews: 342,
+      image: partner.photo,
+      phone: partner.phone || '+91 98765 43210',
+      distance: '2.3 km away',
+      arrivalTime: '15 mins',
+    };
+    sendSuccess(res, mockProvider, 'Mock partner fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   getAddresses,
   addAddress,
   updateAddress,
-  deleteAddress
+  deleteAddress,
+  getMockPartner
 };
