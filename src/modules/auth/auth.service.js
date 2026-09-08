@@ -27,8 +27,8 @@ const sendOtp = async (phone) => {
   // Invalidate previous OTPs
   await OTP.deleteMany({ phone });
 
-  // Generate 6-digit OTP (Static for development/testing)
-  const otp = env.nodeEnv === 'development' ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
+  // Generate 6-digit OTP (Static for development/testing/user request)
+  const otp = '123456';
   
   // Hash OTP
   const salt = await bcrypt.genSalt(10);
