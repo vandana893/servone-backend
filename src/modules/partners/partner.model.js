@@ -25,6 +25,10 @@ const partnerSchema = new mongoose.Schema({
   // Profile
   photo: String,
   businessName: { type: String, trim: true, maxlength: 100 },
+  businessType: { type: String, trim: true, maxlength: 100 },
+  establishedYear: { type: Number },
+  employees: { type: Number },
+  website: { type: String, trim: true },
   brand: { type: String, trim: true, maxlength: 100 },
   
   // Service Information
@@ -62,7 +66,8 @@ const partnerSchema = new mongoose.Schema({
   kycDetails: {
     aadharNumber: { type: String, trim: true },
     panNumber: { type: String, trim: true },
-    tradeLicenseNumber: { type: String, trim: true }
+    tradeLicenseNumber: { type: String, trim: true },
+    registrationNumber: { type: String, trim: true }
   },
   walletBalance: { type: Number, default: 0 },
   

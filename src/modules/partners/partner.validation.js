@@ -4,6 +4,17 @@ const updatePartnerProfileSchema = {
   body: Joi.object({
     name: Joi.string().trim().max(100),
     businessName: Joi.string().trim().max(100),
+    businessType: Joi.string().trim().max(100).allow(''),
+    establishedYear: Joi.number().optional().allow(null, ''),
+    employees: Joi.number().optional().allow(null, ''),
+    website: Joi.string().trim().optional().allow(''),
+    email: Joi.string().email().optional().allow(''),
+    phone: Joi.string().trim().optional().allow(''),
+    kycDetails: Joi.object({
+      panNumber: Joi.string().trim().optional().allow(''),
+      tradeLicenseNumber: Joi.string().trim().optional().allow(''),
+      registrationNumber: Joi.string().trim().optional().allow('')
+    }).unknown(true).optional(),
     brand: Joi.string().trim().max(100),
     photo: Joi.string(),
     skills: Joi.array().items(Joi.string().trim().max(50)),
