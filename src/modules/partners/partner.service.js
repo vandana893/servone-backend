@@ -108,17 +108,57 @@ const deleteWorker = async (partnerId, workerId) => {
 };
 
 // KYC specific
-const submitKyc = async (partnerId, kycData) => {
+const submitKyc = async (partnerId, kycData = {}, files) => {
   const partner = await Partner.findById(partnerId);
   if (!partner) throwError('Partner not found', 404);
 
   partner.kycDetails = {
-    ...partner.kycDetails,
-    ...(kycData.aadharNumber && { aadharNumber: kycData.aadharNumber }),
-    ...(kycData.panNumber && { panNumber: kycData.panNumber }),
-    ...(kycData.tradeLicenseNumber && { tradeLicenseNumber: kycData.tradeLicenseNumber })
+    ...(partner.kycDetails || {}),
+    ...(kycData?.aadharNumber && { aadharNumber: kycData.aadharNumber }),
+    ...(kycData?.panNumber && { panNumber: kycData.panNumber }),
+    ...(kycData?.tradeLicenseNumber && { tradeLicenseNumber: kycData.tradeLicenseNumber })
   };
+
+  // Extract dynamically sent document number if any
+  if (kycData?.documentType && kycData?.documentNumber) {
+    if (kycData.documentType === 'Aadhaar Card') partner.kycDetails.aadharNumber = kycData.documentNumber;
+    else if (kycData.documentType === 'PAN Card') partner.kycDetails.panNumber = kycData.documentNumber;
+    else if (kycData.documentType === 'GST Certificate') partner.kycDetails.tradeLicenseNumber = kycData.documentNumber;
+  }
   
+  // 1. Handle multipart/form-data file uploads
+  if (files && files.length > 0) {
+    const { uploadToCloudinary } = require('../../utils/upload');
+    for (const file of files) {
+      try {
+        const result = await uploadToCloudinary(file.buffer, `partners/${partner.phone}/documents`);
+        const docName = kycData.documentType || file.fieldname || 'Document';
+        const finalDocName = file.fieldname === 'backImage' ? `${docName} Back` : docName;
+        
+        if (finalDocName === 'Selfie') {
+          partner.photo = result.secure_url;
+        }
+
+        // Check if document already exists, update it if so
+        const existingDocIndex = partner.documents.findIndex(d => d.name === finalDocName);
+        if (existingDocIndex >= 0) {
+          partner.documents[existingDocIndex].url = result.secure_url;
+          partner.documents[existingDocIndex].status = 'Pending';
+        } else {
+          partner.documents.push({
+            name: finalDocName,
+            url: result.secure_url,
+            status: 'Pending'
+          });
+        }
+      } catch (error) {
+        console.error(`Failed to upload file ${file.fieldname}:`, error);
+        throwError(`Failed to upload document ${file.fieldname} to storage`, 500);
+      }
+    }
+  }
+
+  // 2. Handle legacy base64 or URL uploads from JSON
   if (kycData.documents && Array.isArray(kycData.documents)) {
     const { uploadToCloudinary } = require('../../utils/upload');
     for (const doc of kycData.documents) {
@@ -130,20 +170,34 @@ const submitKyc = async (partnerId, kycData) => {
           if (doc.name === 'Selfie') {
             partner.photo = result.secure_url;
           }
-          partner.documents.push({
-            name: doc.name,
-            url: result.secure_url,
-            status: 'PENDING'
-          });
+          
+          const existingDocIndex = partner.documents.findIndex(d => d.name === doc.name);
+          if (existingDocIndex >= 0) {
+            partner.documents[existingDocIndex].url = result.secure_url;
+            partner.documents[existingDocIndex].status = 'Pending';
+          } else {
+            partner.documents.push({
+              name: doc.name,
+              url: result.secure_url,
+              status: 'Pending'
+            });
+          }
         } catch (error) {
           console.error(`Failed to upload document ${doc.name}:`, error);
+          throwError(`Failed to upload document ${doc.name} to storage`, 500);
         }
       } else if (doc.url) {
-        partner.documents.push({
-          name: doc.name,
-          url: doc.url,
-          status: 'PENDING'
-        });
+        const existingDocIndex = partner.documents.findIndex(d => d.name === doc.name);
+        if (existingDocIndex >= 0) {
+          partner.documents[existingDocIndex].url = doc.url;
+          partner.documents[existingDocIndex].status = 'Pending';
+        } else {
+          partner.documents.push({
+            name: doc.name,
+            url: doc.url,
+            status: 'Pending'
+          });
+        }
       }
     }
   }
@@ -155,12 +209,23 @@ const submitKyc = async (partnerId, kycData) => {
 };
 
 const verifyKyc = async (partnerId, status, notes) => {
-  const partner = await Partner.findByIdAndUpdate(
-    partnerId,
-    { verificationStatus: status, kycNotes: notes },
-    { returnDocument: 'after' }
-  );
+  const partner = await Partner.findById(partnerId);
   if (!partner) throwError('Partner not found', 404);
+
+  partner.verificationStatus = status;
+  partner.kycNotes = notes;
+
+  if (status === 'APPROVED') {
+    partner.documents.forEach(doc => {
+      doc.status = 'Verified';
+    });
+  } else if (status === 'REJECTED') {
+    partner.documents.forEach(doc => {
+      doc.status = 'Rejected';
+    });
+  }
+
+  await partner.save();
   return partner;
 };
 

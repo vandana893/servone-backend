@@ -66,6 +66,8 @@ const submitKycSchema = {
     aadharNumber: Joi.string().trim().optional().allow(''),
     panNumber: Joi.string().trim().optional().allow(''),
     tradeLicenseNumber: Joi.string().trim().optional().allow(''),
+    documentType: Joi.string().trim().optional().allow(''),
+    documentNumber: Joi.string().trim().optional().allow(''),
     documents: Joi.array().items(
       Joi.object({
         name: Joi.string().required(),

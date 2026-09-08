@@ -28,8 +28,10 @@ router.post('/workers', validate(addWorkerSchema), partnerController.addWorker);
 router.put('/workers/:workerId', validate(workerIdSchema), validate(updateWorkerSchema), partnerController.updateWorker);
 router.delete('/workers/:workerId', validate(workerIdSchema), partnerController.deleteWorker);
 
+const { uploadDocument } = require('../../utils/upload');
+
 // KYC
-router.put('/me/kyc', validate(submitKycSchema), partnerController.submitKyc);
+router.put('/me/kyc', uploadDocument.any(), validate(submitKycSchema), partnerController.submitKyc);
 
 // Admin KYC verify
 router.put('/admin/:id/kyc-verify', authorize('SuperAdmin', 'Manager'), auditLogger('VERIFY_KYC', 'Partner'), validate(verifyKycSchema), partnerController.verifyKyc);

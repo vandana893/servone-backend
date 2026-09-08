@@ -58,7 +58,7 @@ const deleteWorker = async (req, res, next) => {
 
 const submitKyc = async (req, res, next) => {
   try {
-    const partner = await partnerService.submitKyc(req.auth.accountId, req.body);
+    const partner = await partnerService.submitKyc(req.auth.accountId, req.body, req.files);
     sendSuccess(res, partner, 'KYC details submitted successfully');
   } catch (error) {
     next(error);
