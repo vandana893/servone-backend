@@ -5,6 +5,7 @@ const updateProfileSchema = {
     name: Joi.string(),
     email: Joi.string().email(),
     gender: Joi.string().valid('Male', 'Female', 'Other'),
+    dob: Joi.string(),
     language: Joi.string().valid('English', 'Hindi')
   })
 };

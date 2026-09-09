@@ -29,6 +29,9 @@ const updateUserStatus = async (userId, status) => {
 };
 
 const updateUserProfile = async (userId, updateData) => {
+  if (updateData.name || updateData.dob) {
+    updateData.profileCompleted = true;
+  }
   return await User.findByIdAndUpdate(
     userId,
     { $set: updateData },

@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
   profileCompleted: { type: Boolean, default: false },
   photo: { type: String },
   gender: { type: String, enum: ['Male', 'Female', 'Other'] },
+  dob: { type: String },
   language: { type: String, default: 'English' }, // Hindi/English
   addresses: [addressSchema],
   referralCode: { type: String, unique: true, sparse: true },
