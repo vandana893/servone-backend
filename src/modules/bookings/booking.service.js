@@ -128,15 +128,31 @@ const validTransitions = {
 };
 
 const updateBookingStatus = async (bookingId, updateData, auth) => {
-  const booking = await getBookingById(bookingId, auth);
-  if (!booking) throw new Error('Booking not found or access denied');
+  const booking = await Booking.findById(bookingId);
+  if (!booking) throw new Error('Booking not found');
+
+  const isOwner = auth.accountType === 'USER' && booking.userId?.toString() === auth.accountId.toString();
+  const isAssigned = auth.accountType === 'PARTNER' && booking.partnerId?.toString() === auth.accountId.toString();
+  const isAdmin = auth.accountType === 'ADMIN';
+  
+  let isPendingPartner = false;
+  if (auth.accountType === 'PARTNER' && booking.status === 'PENDING') {
+    const partner = await Partner.findById(auth.accountId);
+    if (partner && partner.services && partner.services.length > 0 && partner.services.includes(booking.serviceId)) {
+      isPendingPartner = true;
+    }
+  }
+
+  if (!isOwner && !isAssigned && !isAdmin && !isPendingPartner) {
+    throw new Error('Access denied');
+  }
 
   const { status, note } = updateData;
 
   if (auth.accountType !== 'ADMIN') {
     if (auth.accountType === 'USER') throw new Error('Users cannot arbitrarily change status');
     if (auth.accountType === 'PARTNER') {
-      if (booking.partnerId && booking.partnerId._id.toString() !== auth.accountId.toString()) {
+      if (booking.partnerId && booking.partnerId.toString() !== auth.accountId.toString()) {
         throw new Error('Not authorized to update this booking');
       }
       if (auth.partnerType === 'ISP' && !['EN_ROUTE', 'IN_PROGRESS', 'COMPLETED'].includes(status)) {
@@ -185,14 +201,22 @@ const updateBookingStatus = async (bookingId, updateData, auth) => {
 };
 
 const cancelBooking = async (bookingId, reason, auth) => {
-  const booking = await getBookingById(bookingId, auth);
-  if (!booking) throw new Error('Booking not found or access denied');
+  const booking = await Booking.findById(bookingId);
+  if (!booking) throw new Error('Booking not found');
+
+  const isOwner = auth.accountType === 'USER' && booking.userId?.toString() === auth.accountId.toString();
+  const isAssigned = auth.accountType === 'PARTNER' && booking.partnerId?.toString() === auth.accountId.toString();
+  const isAdmin = auth.accountType === 'ADMIN';
+
+  if (!isOwner && !isAssigned && !isAdmin) {
+    throw new Error('Access denied');
+  }
 
   if (booking.status === 'COMPLETED' || booking.status === 'CANCELLED' || booking.status === 'REJECTED') {
     throw new Error(`Cannot cancel a booking that is ${booking.status}`);
   }
 
-  if (auth.accountType === 'PARTNER' && (!booking.partnerId || booking.partnerId._id.toString() !== auth.accountId.toString())) {
+  if (auth.accountType === 'PARTNER' && (!booking.partnerId || booking.partnerId.toString() !== auth.accountId.toString())) {
     throw new Error('Partners can only cancel their explicitly assigned bookings');
   }
 
@@ -211,14 +235,22 @@ const cancelBooking = async (bookingId, reason, auth) => {
 };
 
 const rescheduleBooking = async (bookingId, data, auth) => {
-  const booking = await getBookingById(bookingId, auth);
-  if (!booking) throw new Error('Booking not found or access denied');
+  const booking = await Booking.findById(bookingId);
+  if (!booking) throw new Error('Booking not found');
+
+  const isOwner = auth.accountType === 'USER' && booking.userId?.toString() === auth.accountId.toString();
+  const isAssigned = auth.accountType === 'PARTNER' && booking.partnerId?.toString() === auth.accountId.toString();
+  const isAdmin = auth.accountType === 'ADMIN';
+
+  if (!isOwner && !isAssigned && !isAdmin) {
+    throw new Error('Access denied');
+  }
 
   if (booking.status === 'COMPLETED' || booking.status === 'CANCELLED') {
     throw new Error('Cannot reschedule completed or cancelled booking');
   }
 
-  if (auth.accountType === 'PARTNER' && (!booking.partnerId || booking.partnerId._id.toString() !== auth.accountId.toString())) {
+  if (auth.accountType === 'PARTNER' && (!booking.partnerId || booking.partnerId.toString() !== auth.accountId.toString())) {
     throw new Error('Partners can only reschedule their explicitly assigned bookings');
   }
 
