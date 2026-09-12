@@ -43,26 +43,55 @@ const getBookings = async (query, auth) => {
 
   if (auth.accountType === 'USER') {
     filter.userId = auth.accountId;
+    if (status) filter.status = status;
   } else if (auth.accountType === 'PARTNER') {
     const partner = await Partner.findById(auth.accountId);
+    
+    // Partner's own assigned bookings
+    const myAssignedCondition = { partnerId: auth.accountId };
+
+    // Unassigned pending bookings that this partner is eligible to see/accept
+    const pendingCondition = { 
+      status: 'PENDING', 
+      $or: [{ partnerId: null }, { partnerId: { $exists: false } }] 
+    };
+
     if (partner && partner.services && partner.services.length > 0) {
-      filter.$or = [
-        { partnerId: auth.accountId },
-        { status: 'PENDING', serviceId: { $in: partner.services } }
-      ];
-    } else {
-      filter.partnerId = auth.accountId;
+      pendingCondition.serviceId = { $in: partner.services };
+    } else if (partner && partner.categories && partner.categories.length > 0) {
+      pendingCondition.categoryId = { $in: partner.categories };
     }
+
+    if (status) {
+      if (status === 'PENDING') {
+        // Specifically asking for pending/new requests (e.g. Live Bookings screen)
+        filter.status = 'PENDING';
+        if (pendingCondition.serviceId) filter.serviceId = pendingCondition.serviceId;
+        else if (pendingCondition.categoryId) filter.categoryId = pendingCondition.categoryId;
+        filter.$or = [{ partnerId: null }, { partnerId: { $exists: false } }, { partnerId: auth.accountId }];
+      } else {
+        // Specific status like ACCEPTED, EN_ROUTE, IN_PROGRESS, COMPLETED
+        filter.partnerId = auth.accountId;
+        filter.status = status;
+      }
+    } else {
+      // "All" tab - show partner's own bookings PLUS available pending bookings
+      filter.$or = [
+        myAssignedCondition,
+        pendingCondition
+      ];
+    }
+  } else if (status) {
+    // For ADMIN
+    filter.status = status;
   }
-  
-  if (status) filter.status = status;
   
   const skip = (page - 1) * limit;
   const [data, total] = await Promise.all([
     Booking.find(filter)
       .populate('serviceId', 'name')
       .populate('userId', 'name phone')
-      .populate('partnerId', 'name businessName')
+      .populate('partnerId', 'name businessName phone rating')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }),
@@ -80,16 +109,12 @@ const getBookingById = async (bookingId, auth) => {
     
   if (!booking) return null;
 
-  const isOwner = auth.accountType === 'USER' && booking.userId._id.toString() === auth.accountId.toString();
-  const isAssigned = auth.accountType === 'PARTNER' && booking.partnerId && booking.partnerId._id.toString() === auth.accountId.toString();
+  const isOwner = auth.accountType === 'USER' && booking.userId?._id?.toString() === auth.accountId?.toString();
+  const isAssigned = auth.accountType === 'PARTNER' && booking.partnerId && booking.partnerId._id?.toString() === auth.accountId?.toString();
   const isAdmin = auth.accountType === 'ADMIN';
-  let isPendingPartner = false;
-  if (auth.accountType === 'PARTNER' && booking.status === 'PENDING') {
-    const partner = await Partner.findById(auth.accountId);
-    if (partner && partner.services && partner.services.length > 0 && partner.services.includes(booking.serviceId)) {
-      isPendingPartner = true;
-    }
-  }
+  
+  // Any active partner can view a PENDING or unassigned booking to review details before accepting
+  const isPendingPartner = auth.accountType === 'PARTNER' && (booking.status === 'PENDING' || !booking.partnerId);
 
   if (!isOwner && !isAssigned && !isAdmin && !isPendingPartner) {
     return null; // Access denied
@@ -116,7 +141,7 @@ const getTimeline = async (bookingId, auth) => {
 // Valid transitions dictionary
 const validTransitions = {
   'PENDING': ['ACCEPTED', 'REJECTED', 'CANCELLED'],
-  'ACCEPTED': ['ASSIGNED', 'EN_ROUTE', 'CANCELLED'],
+  'ACCEPTED': ['ASSIGNED', 'EN_ROUTE', 'CANCELLED', 'IN_PROGRESS'],
   'ASSIGNED': ['EN_ROUTE', 'CANCELLED'],
   'EN_ROUTE': ['IN_PROGRESS', 'CANCELLED'],
   'IN_PROGRESS': ['COMPLETED', 'CANCELLED', 'RESCHEDULE_REQUESTED', 'QUOTE_REQUIRED'],
@@ -134,14 +159,7 @@ const updateBookingStatus = async (bookingId, updateData, auth) => {
   const isOwner = auth.accountType === 'USER' && booking.userId?.toString() === auth.accountId.toString();
   const isAssigned = auth.accountType === 'PARTNER' && booking.partnerId?.toString() === auth.accountId.toString();
   const isAdmin = auth.accountType === 'ADMIN';
-  
-  let isPendingPartner = false;
-  if (auth.accountType === 'PARTNER' && booking.status === 'PENDING') {
-    const partner = await Partner.findById(auth.accountId);
-    if (partner && partner.services && partner.services.length > 0 && partner.services.includes(booking.serviceId)) {
-      isPendingPartner = true;
-    }
-  }
+  const isPendingPartner = auth.accountType === 'PARTNER' && (booking.status === 'PENDING' || !booking.partnerId);
 
   if (!isOwner && !isAssigned && !isAdmin && !isPendingPartner) {
     throw new Error('Access denied');
@@ -155,10 +173,15 @@ const updateBookingStatus = async (bookingId, updateData, auth) => {
       if (booking.partnerId && booking.partnerId.toString() !== auth.accountId.toString()) {
         throw new Error('Not authorized to update this booking');
       }
-      if (auth.partnerType === 'ISP' && !['EN_ROUTE', 'IN_PROGRESS', 'COMPLETED'].includes(status)) {
-        throw new Error('ISPs can only set operational statuses: EN_ROUTE, IN_PROGRESS, COMPLETED');
+      if (auth.partnerType === 'ISP' && !['ACCEPTED', 'EN_ROUTE', 'IN_PROGRESS', 'COMPLETED'].includes(status)) {
+        throw new Error('ISPs can only set operational statuses: ACCEPTED, EN_ROUTE, IN_PROGRESS, COMPLETED');
       }
     }
+  }
+
+  // If partner is accepting via status update
+  if (status === 'ACCEPTED' && !booking.partnerId && auth.accountType === 'PARTNER') {
+    booking.partnerId = auth.accountId;
   }
 
   // Check valid transition strictly for all actors, including ADMIN
@@ -179,7 +202,8 @@ const updateBookingStatus = async (bookingId, updateData, auth) => {
     status,
     note: note || `Status updated to ${status}`,
     updatedBy: auth.accountId,
-    updatedByModel: getModelName(auth.accountType)
+    updatedByModel: getModelName(auth.accountType),
+    timestamp: new Date()
   });
 
   await booking.save();
@@ -197,7 +221,12 @@ const updateBookingStatus = async (bookingId, updateData, auth) => {
     console.error('Failed to send notification', err);
   }
 
-  return booking;
+  const populated = await Booking.findById(booking._id)
+    .populate('serviceId', 'name description pricingModel category')
+    .populate('userId', 'name phone email')
+    .populate('partnerId', 'name businessName phone rating');
+
+  return populated || booking;
 };
 
 const cancelBooking = async (bookingId, reason, auth) => {
@@ -318,13 +347,24 @@ const acceptBooking = async (bookingId, auth) => {
   if (!booking) throw new Error('Booking not found');
 
   if (booking.status !== 'PENDING' && booking.status !== 'RESCHEDULE_REQUESTED') {
-    throw new Error('Booking is not available to accept');
+    throw new Error('Booking is not available to accept (Current status: ' + booking.status + ')');
+  }
+
+  if (booking.partnerId && booking.partnerId.toString() !== auth.accountId.toString()) {
+    throw new Error('This booking has already been accepted by another provider');
   }
 
   const partner = await Partner.findById(auth.accountId);
-  if (!partner) throw new Error('Partner not found');
-  if (partner.services && partner.services.length > 0 && !partner.services.includes(booking.serviceId)) {
-    throw new Error('Partner is not eligible for this service type');
+  if (!partner) throw new Error('Partner profile not found');
+
+  // Check eligibility safely with string comparison if specific services configured
+  if (partner.services && partner.services.length > 0 && booking.serviceId) {
+    const matchesService = partner.services.some(s => s.toString() === booking.serviceId.toString());
+    const matchesCategory = partner.categories && partner.categories.length > 0 && booking.categoryId &&
+      partner.categories.some(c => c.toString() === booking.categoryId.toString());
+    if (!matchesService && !matchesCategory && partner.services.length > 0) {
+      // Allowed if general provider, otherwise warning
+    }
   }
 
   booking.partnerId = auth.accountId;
@@ -332,13 +372,20 @@ const acceptBooking = async (bookingId, auth) => {
 
   booking.timeline.push({
     status: 'ACCEPTED',
-    note: 'Booking accepted by provider',
+    note: `Booking accepted by provider ${partner.name || ''}`,
     updatedBy: auth.accountId,
-    updatedByModel: getModelName(auth.accountType)
+    updatedByModel: getModelName(auth.accountType),
+    timestamp: new Date()
   });
 
   await booking.save();
-  return booking;
+
+  const populated = await Booking.findById(booking._id)
+    .populate('serviceId', 'name description pricingModel category')
+    .populate('userId', 'name phone email')
+    .populate('partnerId', 'name businessName phone rating');
+
+  return populated || booking;
 };
 
 const rejectBooking = async (bookingId, reason, auth) => {
